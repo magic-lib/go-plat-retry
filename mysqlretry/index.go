@@ -2,9 +2,11 @@
 package mysqlretry
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"github.com/magic-lib/go-plat-mysql/sqlstatement"
+	"github.com/magic-lib/go-plat-retry/retry"
 	"github.com/magic-lib/go-plat-utils/conv"
 	"github.com/magic-lib/go-plat-utils/goroutines"
 	"github.com/samber/lo"
@@ -55,8 +57,8 @@ type RetryConfig struct {
 type RetryService struct {
 	sqlExec   func(query string, args ...any) error
 	sqlQuery  func(query string, args ...any) (*sql.Rows, error)
-	tableName string `json:"table_name"`
-	namespace string `json:"namespace"`
+	tableName string
+	namespace string
 }
 type RetryRecord struct {
 	RetryType     string        `json:"retry_type"`
@@ -158,8 +160,7 @@ func (rs *RetryService) createRetryTable() error {
 	return rs.sqlExec(creatSql)
 }
 
-// Insert 插入请求记录到数据库
-func (rs *RetryService) Insert(r *RetryRecord) error {
+func (rs *RetryService) doRecord(r *RetryRecord) error {
 	if r.Interval == 0 {
 		r.Interval = defaultInterval * time.Second
 	}
@@ -183,6 +184,49 @@ func (rs *RetryService) Insert(r *RetryRecord) error {
 		if err != nil {
 			fmt.Println("retryService register:", rs.namespace, r.RetryType, err.Error())
 		}
+	}
+
+	return nil
+}
+
+// Do 插入请求记录到数据库
+func (rs *RetryService) Do(r *RetryRecord, valuePtr ...any) error {
+	err := rs.DoSync(r, valuePtr...)
+	if err == nil {
+		return nil
+	}
+	return rs.DoAsync(r)
+}
+
+// DoSync 插入请求记录到数据库
+func (rs *RetryService) DoSync(r *RetryRecord, valuePtr ...any) error {
+	err := rs.doRecord(r)
+	if err != nil {
+		return err
+	}
+
+	f, err := rs.getCallback(rs.namespace, r.RetryType)
+	if err != nil || f == nil {
+		return fmt.Errorf("has no retry-executor")
+	}
+	err = retry.New().WithInterval(r.Interval).WithAttemptCount(r.MaxRetries).Do(nil, func(ctx context.Context) (any, error) {
+		ret, err := f(r.Param)
+		if err != nil {
+			return nil, err
+		}
+		return ret, nil
+	}, valuePtr...)
+	if err == nil {
+		return nil
+	}
+	return err
+}
+
+// DoAsync 插入请求记录到数据库
+func (rs *RetryService) DoAsync(r *RetryRecord) error {
+	err := rs.doRecord(r)
+	if err != nil {
+		return err
 	}
 
 	nextRetry := time.Now().Add(r.Interval)
