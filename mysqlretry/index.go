@@ -189,7 +189,7 @@ func (rs *RetryService) doRecord(r *RetryRecord) error {
 	return nil
 }
 
-// Do 插入请求记录到数据库
+// Do 同步重试，失败以后异步重试
 func (rs *RetryService) Do(r *RetryRecord, valuePtr ...any) error {
 	err := rs.DoSync(r, valuePtr...)
 	if err == nil {
@@ -198,7 +198,7 @@ func (rs *RetryService) Do(r *RetryRecord, valuePtr ...any) error {
 	return rs.DoAsync(r)
 }
 
-// DoSync 插入请求记录到数据库
+// DoSync 同步重试
 func (rs *RetryService) DoSync(r *RetryRecord, valuePtr ...any) error {
 	err := rs.doRecord(r)
 	if err != nil {
@@ -216,13 +216,13 @@ func (rs *RetryService) DoSync(r *RetryRecord, valuePtr ...any) error {
 		}
 		return ret, nil
 	}, valuePtr...)
-	if err == nil {
-		return nil
+	if err != nil {
+		return err
 	}
-	return err
+	return nil
 }
 
-// DoAsync 插入请求记录到数据库
+// DoAsync 异步重试
 func (rs *RetryService) DoAsync(r *RetryRecord) error {
 	err := rs.doRecord(r)
 	if err != nil {
@@ -285,7 +285,9 @@ func (rs *RetryService) scanRecords() ([]map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() {
+		_ = rows.Close()
+	}()
 
 	// 获取列名
 	columns, err := rows.Columns()
@@ -339,7 +341,7 @@ func (rs *RetryService) failureExec(item *retryRecord, err error) error {
 func (rs *RetryService) successExec(item *retryRecord, resp string) error {
 	successSql := fmt.Sprintf(`
         UPDATE %s
-        SET response = ?, retries = retries + 1, update_time=?, status="%s"
+        SET response = ?, retries = retries + 1, update_time=?, status='%s'
         WHERE id = ?
     `, rs.tableName, retryStatusSuccess)
 	return rs.sqlExec(successSql, resp, conv.String(time.Now()), item.Id)
@@ -390,7 +392,6 @@ func (rs *RetryService) Start() {
 		// 定时扫描需要重试的请求记录
 		ticker := time.NewTicker(defaultInterval * time.Second)
 		defer ticker.Stop()
-
 		for {
 			select {
 			case <-ticker.C:
