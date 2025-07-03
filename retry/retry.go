@@ -28,7 +28,7 @@ ErrCallbackFunc 回调函数
 	nowAttemptCount 当前尝试次数
 	err 错误
 */
-type ErrCallbackFunc func(err error) error
+type ErrCallbackFunc func(err error, index int) error
 
 // New 创建一个重试器
 func New() *retry {
@@ -58,9 +58,14 @@ func (r *retry) WithErrCallback(errFun ErrCallbackFunc) *retry {
 }
 
 // Do 执行一个函数
-func (r *retry) Do(parentCtx context.Context, f Executable, valuePtr ...any) error {
-	if len(valuePtr) > 0 && valuePtr[0] != nil {
-		rf := reflect.ValueOf(valuePtr[0])
+func (r *retry) Do(ctx context.Context, f Executable, valuePtr ...any) error {
+	var valueFirst any = nil
+	if len(valuePtr) > 0 {
+		valueFirst = valuePtr[0]
+	}
+
+	if valueFirst != nil {
+		rf := reflect.ValueOf(valueFirst)
 		if rf.Type().Kind() != reflect.Ptr {
 			return errNotPointer
 		}
@@ -68,15 +73,15 @@ func (r *retry) Do(parentCtx context.Context, f Executable, valuePtr ...any) err
 
 	var retData any
 	var err error
-	if parentCtx == nil {
-		parentCtx = context.Background()
+	if ctx == nil {
+		ctx = context.Background()
 	}
-	retData, err = r.doRetryWithCtx(parentCtx, f)
-	if len(valuePtr) == 0 || valuePtr[0] == nil {
+	retData, err = r.doRetryWithCtx(ctx, f)
+	if len(valuePtr) == 0 || valueFirst == nil {
 		return err
 	}
 
-	rf := reflect.ValueOf(valuePtr[0])
+	rf := reflect.ValueOf(valueFirst)
 	if rf.Elem().CanSet() {
 		fv := reflect.ValueOf(retData)
 		if fv.IsValid() {
@@ -93,7 +98,7 @@ func (r *retry) Do(parentCtx context.Context, f Executable, valuePtr ...any) err
 	return err
 }
 
-// DoCtx 执行一个函数
+// doRetryWithCtx 执行一个函数
 func (r *retry) doRetryWithCtx(parentCtx context.Context, fn Executable) (any, error) {
 	ctx, cancel := context.WithCancel(parentCtx)
 	defer cancel()
@@ -112,7 +117,6 @@ func (r *retry) doRetryWithCtx(parentCtx context.Context, fn Executable) (any, e
 		})
 
 		select {
-		//
 		case <-parentCtx.Done():
 			return nil, parentCtx.Err()
 		case err := <-fail:
@@ -121,7 +125,7 @@ func (r *retry) doRetryWithCtx(parentCtx context.Context, fn Executable) (any, e
 			}
 
 			if r.errCallFun != nil {
-				callbackErr := r.errCallFun(err)
+				callbackErr := r.errCallFun(err, nowAttemptCount)
 				if callbackErr != nil {
 					//表示这个是致命错误，不用重试了
 					return nil, callbackErr

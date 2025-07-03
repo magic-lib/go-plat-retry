@@ -26,9 +26,10 @@ const (
 )
 
 var (
-	registerCallback = make(map[string]RetryExecutor)
-	lockMutex        = make(map[string]bool)
-	onceLocker       sync.Mutex
+	registerCallback    = make(map[string]RetryExecutor)
+	registerErrCallback = make(map[string]ErrCallbackFunc)
+	lockMutex           = make(map[string]bool)
+	onceLocker          sync.Mutex
 )
 
 // retryRecord 定义请求记录结构体
@@ -70,6 +71,7 @@ type RetryRecord struct {
 }
 
 type RetryExecutor func(args []any) (any, error)
+type ErrCallbackFunc func(err error, index int) error
 
 func NewMysqlRetry(rc *RetryConfig) (*RetryService, error) {
 	if rc.Namespace == "" {
@@ -115,7 +117,21 @@ func getCallbackKey(namespace, retryType string) string {
 	return fmt.Sprintf("%s/%s", namespace, retryType)
 }
 
-func Register(namespace, retryType string, fun RetryExecutor) error {
+func Register(namespace, retryType string, fun RetryExecutor, errFun ...ErrCallbackFunc) error {
+	var err1, err2 error
+	err1 = registerFun(namespace, retryType, fun)
+	if len(errFun) > 0 {
+		err2 = registerErrFun(namespace, retryType, errFun[0])
+	}
+	if err1 != nil {
+		return err1
+	}
+	if err2 != nil {
+		return err2
+	}
+	return nil
+}
+func registerFun(namespace, retryType string, fun RetryExecutor) error {
 	callbackKey := getCallbackKey(namespace, retryType)
 	if callbackKey == "" {
 		return fmt.Errorf("namespace or retryType is empty")
@@ -123,15 +139,41 @@ func Register(namespace, retryType string, fun RetryExecutor) error {
 	if _, ok := registerCallback[callbackKey]; ok {
 		return fmt.Errorf("retryType is already registered")
 	}
-	registerCallback[callbackKey] = fun
+	if fun != nil {
+		registerCallback[callbackKey] = fun
+	}
 	return nil
 }
+func registerErrFun(namespace, retryType string, errFun ErrCallbackFunc) error {
+	callbackKey := getCallbackKey(namespace, retryType)
+	if callbackKey == "" {
+		return fmt.Errorf("namespace or retryType is empty")
+	}
+	if _, ok := registerErrCallback[callbackKey]; ok {
+		return nil
+	}
+	if errFun != nil {
+		registerErrCallback[callbackKey] = errFun
+	}
+	return nil
+}
+
 func (rs *RetryService) getCallback(namespace, retryType string) (RetryExecutor, error) {
 	callbackKey := getCallbackKey(namespace, retryType)
 	if callbackKey == "" {
 		return nil, fmt.Errorf("namespace or retryType is empty")
 	}
 	if f, ok := registerCallback[callbackKey]; ok {
+		return f, nil
+	}
+	return nil, fmt.Errorf("find no function")
+}
+func (rs *RetryService) getErrCallback(namespace, retryType string) (ErrCallbackFunc, error) {
+	callbackKey := getCallbackKey(namespace, retryType)
+	if callbackKey == "" {
+		return nil, fmt.Errorf("namespace or retryType is empty")
+	}
+	if f, ok := registerErrCallback[callbackKey]; ok {
 		return f, nil
 	}
 	return nil, fmt.Errorf("find no function")
@@ -189,7 +231,7 @@ func (rs *RetryService) doRecord(r *RetryRecord) error {
 	return nil
 }
 
-// Do 插入请求记录到数据库
+// Do 同步重试，失败以后异步重试
 func (rs *RetryService) Do(r *RetryRecord, valuePtr ...any) error {
 	err := rs.DoSync(r, valuePtr...)
 	if err == nil {
@@ -198,7 +240,7 @@ func (rs *RetryService) Do(r *RetryRecord, valuePtr ...any) error {
 	return rs.DoAsync(r)
 }
 
-// DoSync 插入请求记录到数据库
+// DoSync 同步重试
 func (rs *RetryService) DoSync(r *RetryRecord, valuePtr ...any) error {
 	err := rs.doRecord(r)
 	if err != nil {
@@ -209,20 +251,28 @@ func (rs *RetryService) DoSync(r *RetryRecord, valuePtr ...any) error {
 	if err != nil || f == nil {
 		return fmt.Errorf("has no retry-executor")
 	}
-	err = retry.New().WithInterval(r.Interval).WithAttemptCount(r.MaxRetries).Do(nil, func(ctx context.Context) (any, error) {
+	retryModel := retry.New().WithInterval(r.Interval).WithAttemptCount(r.MaxRetries)
+
+	errCallFun, _ := rs.getErrCallback(rs.namespace, r.RetryType)
+	if errCallFun != nil {
+		retryModel = retryModel.WithErrCallback(func(err error, index int) error {
+			return errCallFun(err, index)
+		})
+	}
+	err = retryModel.Do(nil, func(ctx context.Context) (any, error) {
 		ret, err := f(r.Param)
 		if err != nil {
 			return nil, err
 		}
 		return ret, nil
 	}, valuePtr...)
-	if err == nil {
-		return nil
+	if err != nil {
+		return err
 	}
-	return err
+	return nil
 }
 
-// DoAsync 插入请求记录到数据库
+// DoAsync 异步重试
 func (rs *RetryService) DoAsync(r *RetryRecord) error {
 	err := rs.doRecord(r)
 	if err != nil {
@@ -285,7 +335,9 @@ func (rs *RetryService) scanRecords() ([]map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() {
+		_ = rows.Close()
+	}()
 
 	// 获取列名
 	columns, err := rows.Columns()
@@ -296,14 +348,14 @@ func (rs *RetryService) scanRecords() ([]map[string]string, error) {
 	var result []map[string]string
 	// 为每一行创建一个 []any 数组
 	values := make([]any, len(columns))
-	valuePtrs := make([]any, len(columns))
+	valuePtrList := make([]any, len(columns))
 	for i := range values {
-		valuePtrs[i] = &values[i]
+		valuePtrList[i] = &values[i]
 	}
 
 	// 遍历结果集
 	for rows.Next() {
-		err := rows.Scan(valuePtrs...)
+		err = rows.Scan(valuePtrList...)
 		if err != nil {
 			return nil, err
 		}
@@ -317,11 +369,92 @@ func (rs *RetryService) scanRecords() ([]map[string]string, error) {
 	return result, nil
 }
 
+func (rs *RetryService) scanCurrentRecord(id int64) (map[string]string, error) {
+	whereCond := sqlstatement.LogicCondition{
+		Conditions: []any{
+			sqlstatement.Condition{
+				Field:    "namespace",
+				Operator: "=",
+				Value:    rs.namespace,
+			},
+			sqlstatement.Condition{
+				Field:    "id",
+				Operator: "=",
+				Value:    id,
+			},
+		},
+		Operator: "AND",
+	}
+	st := sqlstatement.Statement{}
+	whereQuery, data := st.GenerateWhereClause(whereCond)
+	sqlStr := fmt.Sprintf("SELECT * FROM %s WHERE %s order by next_retry asc limit %d",
+		rs.tableName, whereQuery, 1)
+
+	rows, err := rs.sqlQuery(sqlStr, data...)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		_ = rows.Close()
+	}()
+
+	// 获取列名
+	columns, err := rows.Columns()
+	if err != nil {
+		return nil, err
+	}
+
+	// 为每一行创建一个 []any 数组
+	values := make([]any, len(columns))
+	valuePtrList := make([]any, len(columns))
+	for i := range values {
+		valuePtrList[i] = &values[i]
+	}
+
+	// 遍历结果集
+	for rows.Next() {
+		err = rows.Scan(valuePtrList...)
+		if err != nil {
+			return nil, err
+		}
+		row := make(map[string]string)
+		lo.ForEach(columns, func(item string, index int) {
+			row[item] = conv.String(values[index])
+		})
+		return row, nil
+	}
+
+	return nil, nil
+}
+
 // 执行失败
 func (rs *RetryService) failureExec(item *retryRecord, err error) error {
 	errList := make([]string, 0)
 	if item.Errors != "" {
 		_ = conv.Unmarshal(item.Errors, &errList)
+	}
+
+	errCallFun, _ := rs.getErrCallback(rs.namespace, item.RetryType)
+	if errCallFun != nil {
+		index := 1
+		oneRecord, _ := rs.scanCurrentRecord(item.Id)
+		if oneRecord != nil {
+			if retries, ok := oneRecord["retries"]; ok {
+				index, _ = conv.Int(retries)
+				index += 1
+			}
+		}
+		endErr := errCallFun(err, index)
+		if endErr != nil {
+			//表示这个是致命错误，不用重试了
+			failSql := fmt.Sprintf(`
+				UPDATE %s
+				SET errors = ?, update_time=?, status='%s', retries = retries + 1, next_retry = '%s' + INTERVAL %d SECOND
+				WHERE id = ?
+			`, rs.tableName, retryStatusFailure, conv.String(time.Now()), 0)
+			errList = append(errList, err.Error(), endErr.Error())
+			return rs.sqlExec(failSql, conv.String(errList), conv.String(time.Now()), item.Id)
+		}
 	}
 
 	failSql := fmt.Sprintf(`
@@ -339,7 +472,7 @@ func (rs *RetryService) failureExec(item *retryRecord, err error) error {
 func (rs *RetryService) successExec(item *retryRecord, resp string) error {
 	successSql := fmt.Sprintf(`
         UPDATE %s
-        SET response = ?, retries = retries + 1, update_time=?, status="%s"
+        SET response = ?, retries = retries + 1, update_time=?, status='%s'
         WHERE id = ?
     `, rs.tableName, retryStatusSuccess)
 	return rs.sqlExec(successSql, resp, conv.String(time.Now()), item.Id)
@@ -390,7 +523,6 @@ func (rs *RetryService) Start() {
 		// 定时扫描需要重试的请求记录
 		ticker := time.NewTicker(defaultInterval * time.Second)
 		defer ticker.Stop()
-
 		for {
 			select {
 			case <-ticker.C:

@@ -4,7 +4,6 @@ go 1.24.2
 
 require (
 	github.com/magic-lib/go-plat-mysql v1.20250604.1
-	github.com/magic-lib/go-plat-utils v1.20250603.1
 	github.com/samber/lo v1.50.0
 )
 
@@ -18,6 +17,7 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0 // indirect
 	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect
+	github.com/magic-lib/go-plat-utils v1.20250721.3-0.20250901101415-8a10e32c6fe3 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/panjf2000/ants/v2 v2.11.2 // indirect
