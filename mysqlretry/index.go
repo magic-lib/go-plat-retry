@@ -51,6 +51,7 @@ type retryRecord struct {
 }
 
 type RetryConfig struct {
+	DSN       string
 	SqlDB     *sql.DB
 	TableName string `json:"table_name"`
 	Namespace string `json:"namespace"`
@@ -74,6 +75,16 @@ type RetryExecutor func(args []any) (any, error)
 type ErrCallbackFunc func(err error, index int) error
 
 func NewMysqlRetry(rc *RetryConfig) (*RetryService, error) {
+	if rc.SqlDB == nil {
+		if rc.DSN != "" {
+			sqlDB, err := sql.Open("mysql", rc.DSN)
+			if err != nil {
+				return nil, fmt.Errorf("初始化数据库连接失败: %v", err)
+			}
+			rc.SqlDB = sqlDB
+		}
+	}
+
 	if rc.Namespace == "" {
 		return nil, fmt.Errorf("namespace is empty")
 	}
