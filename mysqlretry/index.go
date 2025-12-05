@@ -451,7 +451,7 @@ func (rs *RetryService) failureExec(item *retryRecord, err error) error {
 		oneRecord, _ := rs.scanCurrentRecord(item.Id)
 		if oneRecord != nil {
 			if retries, ok := oneRecord["retries"]; ok {
-				index, _ = conv.Int(retries)
+				index, _ = conv.Convert[int](retries)
 				index += 1
 			}
 		}
