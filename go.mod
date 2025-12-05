@@ -3,7 +3,7 @@ module github.com/magic-lib/go-plat-retry
 go 1.24.2
 
 require (
-	github.com/magic-lib/go-plat-mysql v1.20250604.1
+	github.com/magic-lib/go-plat-mysql v1.20250604.2-0.20251205031013-094dfb0ebae3
 	github.com/magic-lib/go-plat-utils v1.20251105.2-0.20251205024507-7aae01534474
 	github.com/samber/lo v1.50.0
 )

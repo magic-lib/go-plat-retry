@@ -55,8 +55,8 @@ github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 h1:P6pPBnrTSX3DEVR4fDembhR
 github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0/go.mod h1:vmVJ0l/dxyfGW6FmdpVm2joNMFikkuWg0EoCKLGUMNw=
 github.com/leodido/go-urn v1.4.0 h1:WT9HwE9SGECu3lg4d/dIA+jxlljEa1/ffXKmRjqdmIQ=
 github.com/leodido/go-urn v1.4.0/go.mod h1:bvxc+MVxLKB4z00jd1z+Dvzr47oO32F/QSNjSBOlFxI=
-github.com/magic-lib/go-plat-mysql v1.20250604.1 h1:S7/a2hWY+y1B5zWIPXkoMoroS4FS0iNmQyGMbjtS888=
-github.com/magic-lib/go-plat-mysql v1.20250604.1/go.mod h1:3oPppw6mfSY12qQTY7F5MI+nK1wSNOOH8UywUnxGmsU=
+github.com/magic-lib/go-plat-mysql v1.20250604.2-0.20251205031013-094dfb0ebae3 h1:ZWNkManPZzGo3rWMbvpMlcvA3/nvdKJowTde3N3kKug=
+github.com/magic-lib/go-plat-mysql v1.20250604.2-0.20251205031013-094dfb0ebae3/go.mod h1:aYAW2QgmIqmj4XbMJhyFA4x7libdm/a5eB515E69lTE=
 github.com/magic-lib/go-plat-utils v1.20251105.2-0.20251205024507-7aae01534474 h1:F11V7eYah7yLrM5CsVkww3XpDLIcOt3WqMnlrmaLdSA=
 github.com/magic-lib/go-plat-utils v1.20251105.2-0.20251205024507-7aae01534474/go.mod h1:6wNHu0q2inY9Y804CZexvXOgRwAy6WDVHM7ekspF9Vs=
 github.com/marspere/goencrypt v1.0.7 h1:Rlvsc9b7Yeaeda+gsGeCjREVZ/KL7szelRq4+haK5mw=
