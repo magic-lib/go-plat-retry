@@ -55,10 +55,10 @@ github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 h1:P6pPBnrTSX3DEVR4fDembhR
 github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0/go.mod h1:vmVJ0l/dxyfGW6FmdpVm2joNMFikkuWg0EoCKLGUMNw=
 github.com/leodido/go-urn v1.4.0 h1:WT9HwE9SGECu3lg4d/dIA+jxlljEa1/ffXKmRjqdmIQ=
 github.com/leodido/go-urn v1.4.0/go.mod h1:bvxc+MVxLKB4z00jd1z+Dvzr47oO32F/QSNjSBOlFxI=
-github.com/magic-lib/go-plat-mysql v1.20250604.2-0.20251205031013-094dfb0ebae3 h1:ZWNkManPZzGo3rWMbvpMlcvA3/nvdKJowTde3N3kKug=
-github.com/magic-lib/go-plat-mysql v1.20250604.2-0.20251205031013-094dfb0ebae3/go.mod h1:aYAW2QgmIqmj4XbMJhyFA4x7libdm/a5eB515E69lTE=
-github.com/magic-lib/go-plat-utils v1.20251105.2-0.20251205024507-7aae01534474 h1:F11V7eYah7yLrM5CsVkww3XpDLIcOt3WqMnlrmaLdSA=
-github.com/magic-lib/go-plat-utils v1.20251105.2-0.20251205024507-7aae01534474/go.mod h1:6wNHu0q2inY9Y804CZexvXOgRwAy6WDVHM7ekspF9Vs=
+github.com/magic-lib/go-plat-mysql v1.20250604.2-0.20251211061202-bb7d7ab68af3 h1:ykISOHV1RRHXxoIHvbKApeTD5Tf4WnQqqrMNAiBWw+Q=
+github.com/magic-lib/go-plat-mysql v1.20250604.2-0.20251211061202-bb7d7ab68af3/go.mod h1:G2pos7tFNYVkhp35nVj4kSHNXtUpEZIEflccBrycyHw=
+github.com/magic-lib/go-plat-utils v1.20251105.2-0.20251212054545-8d57f2d609fa h1:D0vcZsp1xJODbodsr5hJSICZGjYoszFzNg7grShXr9Q=
+github.com/magic-lib/go-plat-utils v1.20251105.2-0.20251212054545-8d57f2d609fa/go.mod h1:99dDq6RRrWMnjVVHfUhd7B1p9uEc3xoJ72W6nLm/rQs=
 github.com/marspere/goencrypt v1.0.7 h1:Rlvsc9b7Yeaeda+gsGeCjREVZ/KL7szelRq4+haK5mw=
 github.com/marspere/goencrypt v1.0.7/go.mod h1:S5g6Wsd5jcOO01sp9QxNMYCldx9kecoDkK7BWaHA0vo=
 github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421/go.mod h1:6dJC0mAP4ikYIbvyc7fijjWJddQyLn8Ig3JB5CqoB9Q=
