@@ -208,8 +208,7 @@ func (rs *RetryService) createRetryTable() error {
             status VARCHAR(20) DEFAULT '%s',
             create_time DATETIME,
             update_time DATETIME
-        )
-    `, rs.tableName, maxRetries, defaultInterval, retryStatusPending)
+        )`, rs.tableName, maxRetries, defaultInterval, retryStatusPending)
 	return rs.sqlExec(creatSql)
 }
 
