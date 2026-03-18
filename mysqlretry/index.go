@@ -317,12 +317,12 @@ func (rs *RetryService) scanRecords() ([]map[string]string, error) {
 		Conditions: []sqlstatement.ICondition{
 			sqlstatement.Condition{
 				Field:    "namespace",
-				Operator: "=",
+				Operator: sqlstatement.OperatorEqual,
 				Value:    rs.namespace,
 			},
 			sqlstatement.Condition{
 				Field:    "status",
-				Operator: "=",
+				Operator: sqlstatement.OperatorEqual,
 				Value:    retryStatusPending,
 			},
 			sqlstatement.Condition{
@@ -330,11 +330,11 @@ func (rs *RetryService) scanRecords() ([]map[string]string, error) {
 			},
 			sqlstatement.Condition{
 				Field:    "next_retry",
-				Operator: "<=",
+				Operator: sqlstatement.OperatorLessEqual,
 				Value:    conv.String(time.Now()),
 			},
 		},
-		Operator: "AND",
+		Operator: sqlstatement.OperatorAnd,
 	}
 	st := sqlstatement.Statement{}
 	whereQuery, data := st.GenerateWhereClause(whereCond)
@@ -384,16 +384,16 @@ func (rs *RetryService) scanCurrentRecord(id int64) (map[string]string, error) {
 		Conditions: []sqlstatement.ICondition{
 			sqlstatement.Condition{
 				Field:    "namespace",
-				Operator: "=",
+				Operator: sqlstatement.OperatorEqual,
 				Value:    rs.namespace,
 			},
 			sqlstatement.Condition{
 				Field:    "id",
-				Operator: "=",
+				Operator: sqlstatement.OperatorEqual,
 				Value:    id,
 			},
 		},
-		Operator: "AND",
+		Operator: sqlstatement.OperatorAnd,
 	}
 	st := sqlstatement.Statement{}
 	whereQuery, data := st.GenerateWhereClause(whereCond)
