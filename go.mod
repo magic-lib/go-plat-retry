@@ -1,10 +1,10 @@
 module github.com/magic-lib/go-plat-retry
 
-go 1.24.2
+go 1.24.3
 
 require (
-	github.com/magic-lib/go-plat-mysql v1.20260210.1
-	github.com/magic-lib/go-plat-utils v1.20260210.1
+	github.com/magic-lib/go-plat-mysql v1.20260210.2-0.20260318044314-bb9593c8f15f
+	github.com/magic-lib/go-plat-utils v1.20260210.2-0.20260317093845-849fa13b828c
 	github.com/samber/lo v1.52.0
 )
 
@@ -12,9 +12,11 @@ require (
 	cloud.google.com/go/compute/metadata v0.9.0 // indirect
 	github.com/Masterminds/squirrel v1.5.4 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
+	github.com/go-ego/gse v1.0.1 // indirect
 	github.com/go-errors/errors v1.5.1 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
+	github.com/hbollon/go-edlib v1.7.0 // indirect
 	github.com/iancoleman/orderedmap v0.3.0 // indirect
 	github.com/jinzhu/copier v0.4.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
@@ -37,14 +39,15 @@ require (
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/timandy/routine v1.1.5 // indirect
+	github.com/vcaesar/cedar v0.20.2 // indirect
 	github.com/viant/toolbox v0.37.0 // indirect
 	github.com/viant/xreflect v0.0.0-20230303201326-f50afb0feb0d // indirect
 	github.com/viant/xunsafe v0.10.3 // indirect
-	github.com/zeromicro/go-zero v1.9.2 // indirect
+	github.com/zeromicro/go-zero v1.9.4 // indirect
 	go.uber.org/automaxprocs v1.6.0 // indirect
 	golang.org/x/oauth2 v0.32.0 // indirect
-	golang.org/x/sync v0.18.0 // indirect
-	golang.org/x/text v0.31.0 // indirect
+	golang.org/x/sync v0.19.0 // indirect
+	golang.org/x/text v0.34.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
