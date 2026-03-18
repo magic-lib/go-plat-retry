@@ -314,7 +314,7 @@ func (rs *RetryService) DoAsync(r *RetryRecord) error {
 // 扫描需要重试的请求记录
 func (rs *RetryService) scanRecords() ([]map[string]string, error) {
 	whereCond := sqlstatement.LogicCondition{
-		Conditions: []any{
+		Conditions: []sqlstatement.ICondition{
 			sqlstatement.Condition{
 				Field:    "namespace",
 				Operator: "=",
@@ -381,7 +381,7 @@ func (rs *RetryService) scanRecords() ([]map[string]string, error) {
 
 func (rs *RetryService) scanCurrentRecord(id int64) (map[string]string, error) {
 	whereCond := sqlstatement.LogicCondition{
-		Conditions: []any{
+		Conditions: []sqlstatement.ICondition{
 			sqlstatement.Condition{
 				Field:    "namespace",
 				Operator: "=",
