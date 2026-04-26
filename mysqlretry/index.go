@@ -5,6 +5,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/magic-lib/go-plat-cache/cache"
 	"github.com/magic-lib/go-plat-mysql/sqlstatement"
 	"github.com/magic-lib/go-plat-retry/retry"
 	"github.com/magic-lib/go-plat-utils/conv"
@@ -77,11 +78,17 @@ type ErrCallbackFunc func(err error, index int) error
 func NewMysqlRetry(rc *RetryConfig) (*RetryService, error) {
 	if rc.SqlDB == nil {
 		if rc.DSN != "" {
-			sqlDB, err := sql.Open("mysql", rc.DSN)
+			mysqlPool, err := cache.CreateMySqlPool(&cache.MySqlPoolConfig{
+				DSN: rc.DSN,
+			})
 			if err != nil {
-				return nil, fmt.Errorf("初始化数据库连接失败: %v", err)
+				return nil, fmt.Errorf("初始化数据库连接池失败: %v", err)
 			}
-			rc.SqlDB = sqlDB
+			mysqlRes, err := mysqlPool.Get()
+			if err != nil {
+				return nil, fmt.Errorf("获取数据库连接失败: %v", err)
+			}
+			rc.SqlDB = mysqlRes.Get()
 		}
 	}
 
