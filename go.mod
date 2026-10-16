@@ -3,9 +3,10 @@ module github.com/magic-lib/go-plat-retry
 go 1.24.3
 
 require (
-	github.com/magic-lib/go-plat-cache v1.20260210.2-0.20260818104614-73be8b63d66b
+	github.com/cenkalti/backoff/v4 v4.3.0
+	github.com/magic-lib/go-plat-cache v1.20260210.2-0.20260917070835-1b56bc896bf2
 	github.com/magic-lib/go-plat-mysql v1.20260210.2-0.20260818104757-1e79a41b793b
-	github.com/magic-lib/go-plat-utils v1.20260210.2-0.20260818103136-e724e747dd96
+	github.com/magic-lib/go-plat-utils v1.20260902.2-0.20261016025118-6d056bc6ad0c
 	github.com/samber/lo v1.52.0
 )
 
@@ -26,7 +27,6 @@ require (
 	github.com/bytedance/gopkg v0.1.3 // indirect
 	github.com/bytedance/sonic v1.14.2 // indirect
 	github.com/bytedance/sonic/loader v0.4.0 // indirect
-	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cloudwego/base64x v0.1.6 // indirect
 	github.com/coocood/freecache v1.2.4 // indirect
@@ -34,7 +34,9 @@ require (
 	github.com/dgraph-io/ristretto/v2 v2.1.0 // indirect
 	github.com/dgryski/go-metro v0.0.0-20200812162917-85c65e2d0165 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
+	github.com/dlclark/regexp2 v1.10.0 // indirect
 	github.com/docker/go v1.5.1-1 // indirect
+	github.com/dop251/goja v0.0.0-20231024180952-594410467bc6 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/forgoer/openssl v1.6.0 // indirect
@@ -48,12 +50,15 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.30.1 // indirect
 	github.com/go-redis/redis/v8 v8.11.5 // indirect
+	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
 	github.com/go-sql-driver/mysql v1.9.3 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.2 // indirect
 	github.com/golang-jwt/jwt/v5 v5.2.2 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/google/btree v1.1.3 // indirect
+	github.com/google/go-cmp v0.7.0 // indirect
+	github.com/google/pprof v0.0.0-20250208200701-d0013a598941 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79 // indirect
@@ -76,7 +81,7 @@ require (
 	github.com/leonklingele/passphrase v0.0.0-20250510225810-8392a5b34c3f // indirect
 	github.com/lithammer/shortuuid/v3 v3.0.7 // indirect
 	github.com/lqiz/expr v1.1.4 // indirect
-	github.com/magic-lib/go-plat-startupcfg v1.20260210.2-0.20260818104539-4975fbfc160c // indirect
+	github.com/magic-lib/go-plat-startupcfg v1.20260210.2-0.20260908085532-bcf290ddeea0 // indirect
 	github.com/marspere/goencrypt v1.0.7 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
@@ -93,6 +98,7 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
+	github.com/petermattis/goid v0.0.0-20260820044319-269ab09b5261 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_golang v1.23.0 // indirect
@@ -115,6 +121,7 @@ require (
 	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/timandy/routine v1.1.5 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
+	github.com/ucarion/jcs v0.1.2 // indirect
 	github.com/vcaesar/cedar v0.20.2 // indirect
 	github.com/viant/toolbox v0.37.0 // indirect
 	github.com/viant/xreflect v0.0.0-20230303201326-f50afb0feb0d // indirect

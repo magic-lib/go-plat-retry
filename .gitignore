@@ -31,3 +31,4 @@ go.work
 .vscode
 .fleet
 curl/.DS_Store
+.codebuddy
